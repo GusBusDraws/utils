@@ -56,7 +56,7 @@ def wrap_lines_in_file(file_path, wrap_length=75, new_file_keyword='-wrapped'):
                     line = line[1:]
                 # If line ends with space (before newline char),
                 # slice the line to exclude space and add newline back on.
-                if line[-2] == ' ':
+                elif line[-2] == ' ':
                     line = line[:-2] + '\n'
                 # Add current line (replacing newline character with space)
                 prev_line = prev_line + line[:-1] + ' '
@@ -93,12 +93,12 @@ def handle_args(args):
     try:
         if args[0] == '-i':
             if len(args) == 2:
-                wrap_lines_in_file(args[1], new_file_keyword='-wrapped')
+                new_file_kw = '-wrapped'
             elif len(args) == 4 and args[2] == '-o':
                 if args[3] == 'overwrite':
-                    wrap_lines_in_file(args[1], new_file_keyword='')
+                    new_file_kw = ''
                 else:
-                    wrap_lines_in_file(args[1], new_file_keyword=args[3])
+                    new_file_kw = args[3]
             else:
                 print('Error: An option must be passed with each flag.')
                 print('An option must be specified with each flag.')
@@ -110,6 +110,8 @@ def handle_args(args):
                     ' and output filename suffix with "-o"')
     except IndexError:
         print('Input file must be passed after "-i" flag.')
+    finally:
+        wrap_lines_in_file(args[1], new_file_keyword=new_file_kw)
 
 if __name__ == '__main__':
     # wrap_lines_in_file(sys.argv[-1])
