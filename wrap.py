@@ -22,7 +22,7 @@ def wrap_line(line, wrap_length=75):
     lines_wrapped.append(line[start_i :])
     return lines_wrapped
 
-def wrap_lines_in_file(file_path, wrap_length=75, new_file_keyword='-wrapped'):
+def wrap_lines_in_file(file_path, new_file_path, wrap_length=75):
     """Wrap lines of a file to a certain length. File must end with a newline
     character/two blank lines to capture last paragraph.
 
@@ -30,14 +30,13 @@ def wrap_lines_in_file(file_path, wrap_length=75, new_file_keyword='-wrapped'):
     ----------
     file_path : str or Path
         File for which lines will be wrapped.
+    new_file_path : str or Path
+        Path to save new file with wrapped lines.
     wrap_length : int
         Length at which lines will be wrapped.
-    new_file_keyword : str, optional
-        String to place at the end of new file with wrapped lines,
-        by default '-wrapped'
     """
     file_path = Path(file_path)
-    file_path_wrap = Path(file_path.stem + new_file_keyword + file_path.suffix)
+    new_file_path = Path(new_file_path)
     with (
         open(file_path, 'r', encoding='utf-8', errors='ignore') as f,
         # open(file_path_wrap, 'a', encoding='utf-8', errors='ignore') as f_wrap
@@ -67,11 +66,11 @@ def wrap_lines_in_file(file_path, wrap_length=75, new_file_keyword='-wrapped'):
     print()
     print(f'Number of collected lines before wrapping: {len(full_lines)}')
     # Remove contents of file (if existing) before appending wrapped lines
-    if file_path_wrap.exists():
-        open(file_path_wrap, 'w', encoding='utf-8', errors='ignore').close()
+    if new_file_path.exists():
+        open(new_file_path, 'w', encoding='utf-8', errors='ignore').close()
     # Open new file and iterate through full lines to wrap into sublines
     with open(
-        file_path_wrap, 'a', encoding='utf-8', errors='ignore'
+        new_file_path, 'a', encoding='utf-8', errors='ignore'
     ) as f_wrap:
         for full_line in full_lines:
             sublines = wrap_line(full_line, wrap_length=wrap_length)
@@ -81,11 +80,11 @@ def wrap_lines_in_file(file_path, wrap_length=75, new_file_keyword='-wrapped'):
             f_wrap.write('\n')
     # Open file again to read number of final lines
     with open(
-        file_path_wrap, 'r', encoding='utf-8', errors='ignore'
+        new_file_path, 'r', encoding='utf-8', errors='ignore'
     ) as f_wrap:
         print()
         print('Wrapped file:')
-        print(file_path_wrap.resolve())
+        print(new_file_path.resolve())
         lines = f_wrap.readlines()
         print(f'{len(lines)} lines')
 
@@ -93,12 +92,15 @@ def handle_args(args):
     try:
         if args[0] == '-i':
             if len(args) == 2:
-                new_file_kw = '-wrapped'
+                input_path = Path(args[1])
+                new_file = (
+                        f'{input_path.parent}/'
+                        f'{input_path.stem}-wrapped{input_path.suffix}')
             elif len(args) == 4 and args[2] == '-o':
                 if args[3] == 'overwrite':
-                    new_file_kw = ''
+                    new_file = args[1]
                 else:
-                    new_file_kw = args[3]
+                    new_file = args[3]
             else:
                 print('Error: An option must be passed with each flag.')
                 print('An option must be specified with each flag.')
@@ -111,7 +113,7 @@ def handle_args(args):
     except IndexError:
         print('Input file must be passed after "-i" flag.')
     finally:
-        wrap_lines_in_file(args[1], new_file_keyword=new_file_kw)
+        wrap_lines_in_file(args[1], new_file)
 
 if __name__ == '__main__':
     # wrap_lines_in_file(sys.argv[-1])
