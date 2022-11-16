@@ -78,7 +78,8 @@ def wrap_lines_in_file(file_path, new_file_path, wrap_length=75):
             for subline in sublines:
                 # Write full line without space at end of line
                 f_wrap.write(subline + '\n')
-            if subline[0] not in IGNORE_LINE_CHARS:
+            # If the last subline is not empty, add a newline character
+            if subline != '' and subline[0] not in IGNORE_LINE_CHARS:
                 f_wrap.write('\n')
     # Open file again to read number of final lines
     with open(
