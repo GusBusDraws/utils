@@ -2,11 +2,7 @@ from pathlib import Path
 import sys
 
 
-# To-do
-# 1. Investigate situation in which "-o overwrite" for a
-#    file in a nested dir ends up producing a copy of
-#    the file in the current dir instead.
-
+IGNORE_LINE_CHARS = ['\\', '%']
 
 def wrap_line(line, wrap_length=75):
     lines_wrapped = []
@@ -49,7 +45,12 @@ def wrap_lines_in_file(file_path, new_file_path, wrap_length=75):
         print(file_path.resolve())
         print(f'{len(lines)} lines')
         for line in lines:
-            if len(line) > 1:
+            if line[0] in IGNORE_LINE_CHARS:
+                if prev_line != '':
+                    full_lines.append(prev_line[:-1])
+                full_lines.append(line[:-1])
+                prev_line = ''
+            elif len(line) > 1:
                 # If line starts with space, slice the line to exclude space.
                 if line[0] == ' ':
                     line = line[1:]
@@ -59,7 +60,7 @@ def wrap_lines_in_file(file_path, new_file_path, wrap_length=75):
                     line = line[:-2] + '\n'
                 # Add current line (replacing newline character with space)
                 prev_line = prev_line + line[:-1] + ' '
-            if len(line) == 1:
+            elif len(line) == 1:
                 # Append line with previous line without space at end
                 full_lines.append(prev_line[:-1])
                 prev_line = ''
@@ -77,7 +78,8 @@ def wrap_lines_in_file(file_path, new_file_path, wrap_length=75):
             for subline in sublines:
                 # Write full line without space at end of line
                 f_wrap.write(subline + '\n')
-            f_wrap.write('\n')
+            if subline[0] not in IGNORE_LINE_CHARS:
+                f_wrap.write('\n')
     # Open file again to read number of final lines
     with open(
         new_file_path, 'r', encoding='utf-8', errors='ignore'
