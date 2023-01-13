@@ -2,7 +2,7 @@ from pathlib import Path
 import sys
 
 
-IGNORE_LINE_CHARS = ['\\', '%']
+IGNORE_LINE_CHARS = ['\\', '%', '-', '#']
 
 def wrap_line(line, wrap_length=75):
     lines_wrapped = []
